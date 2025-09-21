@@ -29,6 +29,14 @@ const (
 	IntFlagAppMem     uint8 = 4
 )
 
+type ringOpt func(*Params)
+
+func WithSQPolling() ringOpt {
+	return func(p *Params) {
+		p.flags |= SetupSQPoll
+	}
+}
+
 func NewRing() *Ring {
 	return &Ring{
 		sqRing: &SubmissionQueue{},
@@ -36,13 +44,18 @@ func NewRing() *Ring {
 	}
 }
 
-func CreateRing(entries uint32) (*Ring, error) {
+func CreateRing(entries uint32, opts ...ringOpt) (*Ring, error) {
 	var (
-		ring  = NewRing()
-		flags uint32
+		ring = NewRing()
 	)
 
-	err := ring.QueueInit(entries, flags)
+	params := Params{}
+
+	for _, opt := range opts {
+		opt(&params)
+	}
+
+	err := ring.QueueInitParams(entries, &params)
 	if err != nil {
 		return nil, err
 	}
