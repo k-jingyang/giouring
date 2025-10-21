@@ -31,12 +31,6 @@ const (
 
 type ringOpt func(*Params)
 
-func WithSQPolling() ringOpt {
-	return func(p *Params) {
-		p.flags |= SetupSQPoll
-	}
-}
-
 func NewRing() *Ring {
 	return &Ring{
 		sqRing: &SubmissionQueue{},
